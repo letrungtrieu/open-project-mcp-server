@@ -12,7 +12,7 @@
     "dist"
   ],
   "bin": {
-    "openproject": "./dist/index.js"
+    "openproject-mcp": "./dist/index.js"
   },
   "type": "module",
   "keywords": [],
