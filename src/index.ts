@@ -71,12 +71,12 @@ function formatWorkPackage(workPackage: WorkPackage) {
   return {
     id: workPackage.id,
     subject: workPackage.subject,
-    description: workPackage._embedded?.description?.raw || "No description",
     status: workPackage._embedded?.status?.name || "Unknown status",
     type: workPackage._embedded?.type?.name || "Unknown type",
     priority: workPackage._embedded?.priority?.name || "Unknown priority",
     assignee: workPackage._embedded?.assignee?.name || "Unassigned",
     project: workPackage._embedded?.project?.name || "Unknown project",
+    description: workPackage.description?.raw || "No description",
     createdAt: workPackage.createdAt,
     updatedAt: workPackage.updatedAt,
     startDate: workPackage.startDate || "No start date",
