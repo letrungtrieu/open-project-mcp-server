@@ -19,11 +19,6 @@ const config = {
   apiKey: process.env.OPENPROJECT_API_KEY || ""
 };
 
-// Log configuration for debugging
-console.log("OpenProject API Configuration:");
-console.log(`API Base URL: ${config.apiBaseUrl}`);
-console.log(`API Key: ${config.apiKey ? `${config.apiKey.substr(0, 3)}...${config.apiKey.substr(-3)}` : "[Not Set]"}`);
-
 // Create an MCP server
 const server = new McpServer({
   name: "OpenProject MCP Server",
@@ -33,16 +28,11 @@ const server = new McpServer({
 // Helper function to make authenticated requests to OpenProject API
 async function callOpenProjectAPI<T>(endpoint: string, method: string = "GET", body?: any): Promise<T> {
   const url = `${config.apiBaseUrl}${endpoint}`;
-  console.log(`Making ${method} request to: ${url}`);
   
   const headers = {
     "Authorization": `Basic ${Buffer.from(`apikey:${config.apiKey}`).toString('base64')}`,
     "Content-Type": "application/json"
   };
-
-  console.log("Request headers:", Object.keys(headers).map(key => 
-    `${key}: ${key === 'Authorization' ? 'Basic ***' : headers[key as keyof typeof headers]}`
-  ));
 
   const options: any = {
     method,
@@ -51,33 +41,26 @@ async function callOpenProjectAPI<T>(endpoint: string, method: string = "GET", b
 
   if (body && (method === "POST" || method === "PATCH" || method === "PUT")) {
     options.body = JSON.stringify(body);
-    console.log("Request body:", JSON.stringify(body, null, 2));
   }
 
   try {
-    console.log("Sending request...");
     const response = await fetch(url, options);
-    console.log(`Response status: ${response.status} ${response.statusText}`);
     
     if (!response.ok) {
       const responseText = await response.text();
       let errorMessage;
       try {
         const errorData = JSON.parse(responseText) as ErrorResponse;
-        console.error("Error response:", JSON.stringify(errorData, null, 2));
         errorMessage = errorData.message || "Unknown error";
       } catch (e) {
-        console.error("Raw error response:", responseText);
         errorMessage = responseText || "Unknown error";
       }
       throw new Error(`OpenProject API error (${response.status}): ${errorMessage}`);
     }
     
     const responseData = await response.json() as T;
-    console.log("Response data:", JSON.stringify(responseData, null, 2).substring(0, 500) + "...");
     return responseData;
   } catch (error) {
-    console.error("Error calling OpenProject API:", error);
     throw error;
   }
 }
@@ -210,10 +193,8 @@ server.tool(
 // Start the server with stdio transport
 async function startServer() {
   try {
-    console.error("Starting OpenProject MCP Server...");
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.log("Started OpenProject MCP Server!")
   } catch (error) {
     console.error("Error starting server:", error);
     process.exit(1);
