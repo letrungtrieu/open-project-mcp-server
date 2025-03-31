@@ -8,13 +8,14 @@
     "test:watch": "jest --watch",
     "build": "tsc && chmod 755 dist/index.js",
     "dev": "tsc && node --force-node-api-uncaught-exceptions-policy=true dist/index.js",
+    "start": "tsc && chmod 755 dist/index.js && npx -y @modelcontextprotocol/inspector dist/index.js",
     "bin": ""
   },
   "files": [
     "dist"
   ],
   "bin": {
-    "openproject-mcp": "./dist/index.js"
+    "openproject": "./dist/index.js"
   },
   "type": "module",
   "keywords": [],

@@ -91,7 +91,8 @@ function formatWorkPackage(workPackage: WorkPackage, statuses: AvailableStatuses
 
 // Tool 1: Get Work Package Detail
 server.tool(
-  "get-work-package-detail",
+  "get_work_package_detail",
+  "Get the details of a OpenProject work package",
   {
     workPackageId: z.number().describe("ID of the work package to retrieve")
   },
@@ -121,7 +122,8 @@ server.tool(
 
 // Tool 2: Change Work Package Status
 server.tool(
-  "change-work-package-status",
+  "change_work_package_status",
+  "Change the status of a OpenProject work package",
   {
     workPackageId: z.number().describe("ID of the work package to update"),
     status: z.string().describe("New status for the work package")
