@@ -67,7 +67,7 @@ async function callOpenProjectAPI<T>(endpoint: string, method: string = "GET", b
 }
 
 // Format a work package into a human-readable structure
-function formatWorkPackage(workPackage: WorkPackage) {
+function formatWorkPackage(workPackage: WorkPackage, statuses: AvailableStatusesResponse) {
   return {
     id: workPackage.id,
     subject: workPackage.subject,
@@ -76,6 +76,7 @@ function formatWorkPackage(workPackage: WorkPackage) {
     priority: workPackage._embedded?.priority?.name || "Unknown priority",
     assignee: workPackage._embedded?.assignee?.name || "Unassigned",
     project: workPackage._embedded?.project?.name || "Unknown project",
+    projectId: workPackage._embedded?.project?.id || 0,
     description: workPackage.description?.raw || "No description",
     createdAt: workPackage.createdAt,
     updatedAt: workPackage.updatedAt,
@@ -83,7 +84,8 @@ function formatWorkPackage(workPackage: WorkPackage) {
     dueDate: workPackage.dueDate || "No due date",
     estimatedTime: workPackage.estimatedTime || "No estimate",
     percentageDone: workPackage.percentageDone || 0,
-    lockVersion: workPackage.lockVersion
+    lockVersion: workPackage.lockVersion,
+    statuses: statuses._embedded.elements.map(e => e.name)
   };
 }
 
@@ -96,9 +98,8 @@ server.tool(
   async ({ workPackageId }) => {
     try {
       const data = await callOpenProjectAPI<WorkPackage>(`/work_packages/${workPackageId}`);
-      
-      const formattedResponse = formatWorkPackage(data);
-
+      const statuses = await callOpenProjectAPI<AvailableStatusesResponse>(`/statuses`)
+      const formattedResponse = formatWorkPackage(data, statuses);
       return {
         content: [{
           type: "text",
@@ -131,17 +132,15 @@ server.tool(
       const workPackage = await callOpenProjectAPI<WorkPackage>(`/work_packages/${workPackageId}`);
       
       // Get available statuses
-      const availableStatuses = await callOpenProjectAPI<AvailableStatusesResponse>(
-        `/work_packages/${workPackageId}/available_statuses`
-      );
+      const statuses = await callOpenProjectAPI<AvailableStatusesResponse>(`/statuses`)
       
       // Find the status that matches the requested name (case-insensitive)
-      const targetStatus = availableStatuses._embedded.elements.find(
+      const targetStatus = statuses._embedded.elements.find(
         (s: Status) => s.name.toLowerCase() === status.toLowerCase()
       );
       
       if (!targetStatus) {
-        const availableStatusNames = availableStatuses._embedded.elements
+        const availableStatusNames = statuses._embedded.elements
           .map((s: Status) => s.name)
           .join(", ");
         
@@ -170,7 +169,7 @@ server.tool(
         updatePayload
       );
       
-      const formattedWorkPackage = formatWorkPackage(updatedWorkPackage);
+      const formattedWorkPackage = formatWorkPackage(updatedWorkPackage, statuses);
       
       return {
         content: [{
