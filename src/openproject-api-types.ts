@@ -197,6 +197,36 @@ interface CollectionResponse<T> {
 }
 
 /**
+ * Attachment representation
+ */
+interface Attachment extends BaseResource {
+  _type: 'Attachment';
+  fileName: string;
+  fileSize: number;
+  description: FormattedText;
+  status: string;
+  contentType: string;
+  digest: {
+    algorithm: string;
+    hash: string;
+  };
+  createdAt: string;
+}
+
+/**
+ * Attachment collection response
+ */
+interface AttachmentCollectionResponse {
+  _type: 'Collection';
+  total: number;
+  count: number;
+  _embedded: {
+    elements: Attachment[];
+  };
+  _links: Links;
+}
+
+/**
  * Error response from OpenProject API
  */
 interface ErrorResponse {
@@ -226,5 +256,7 @@ export type {
   WorkPackage,
   AvailableStatusesResponse,
   CollectionResponse,
+  Attachment,
+  AttachmentCollectionResponse,
   ErrorResponse
 };
